@@ -1,9 +1,10 @@
 ---
-title: "Post With Code"
-author: "Harlow Malloc"
-date: "2026-01-28"
+title: "Analyzing NFL Quarterbacks for the 2025-26 Season"
+author: "Baxter Lowell"
+date: "2026-02-05"
 categories: [news, code, analysis]
-image: "image.jpg"
+html:
+  embed-resources: true
 ---
 # Introduction
 
