@@ -1,0 +1,63 @@
+---
+title: "index"
+author: "Baxter Lowell"
+html:
+  embed-resources: true
+---
+# Blog Post 2: I want to use maps to view data on different arrest statistics across the US from the "usdata" dataset. I'll create 2 visualizations, 1 mapping murders/100k people and the other mapping assaults/100k people. I am curious as to what geo-spatial patterns may exist, if any. Next, I will pick another variable to map to try and explain one factor that could lead to high crime rates. I hope to use mapping to best show the trends in these data.
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(maps)
+library(usdata)
+state_data = state_stats
+
+state_df <- ggplot2::map_data("state")
+
+state_df = state_df %>%
+  mutate(
+    region = str_to_title(region)
+  )
+us_map_joined = left_join(state_df, state_stats, join_by(region == state))
+```
+
+## Plot 1: Murders per 100k people by state
+```{r}
+ggplot(us_map_joined, aes(x = long, y = lat, group = group))+
+  geom_polygon(aes(fill = murder), color = "black")+
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45)+
+  theme_void()+
+  scale_fill_distiller(palette = "Reds", direction = 1)
+  
+```
+As we can see with the map, the darker colored states equate to a higher murder/100k people. Some obvious patterns are that some of the higher murder numbers occur in states in the south, while the lighest colored states seem to be in New England and also in some of the sparsely populated states in the northern midwest.
+
+## Plot 2: Assaults per 100k people by state
+```{r}
+ggplot(us_map_joined, aes(x = long, y = lat, group = group))+
+  geom_polygon(aes(fill = agg_assault), color = "black")+
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45)+
+  theme_void()+
+  scale_fill_distiller(palette = "Blues", direction = 1)
+```
+The map of assaults per 100k people has some similarities to the previous one. For starters, New England is extremely low yet again, and the northern midwest states are also very light colored. The southern states don't seem quite as dark as the map on murders, and we can notice that two states, Colorado and New Mexico seem to stand out as being the most dark colored.
+
+## Plot 3: Exploring possible explantions using "usdata" package.
+
+While there are likely hundreds of plausible explanations for the patterns/similarities in these plots, I want to examine just 1 or 2 that may be able to explain violent crime rates. Next, I want to map poverty. Poverty is considered a risk factor of violent crime, so I am curious as to what the map will look like.
+```{r}
+ggplot(us_map_joined, aes(x = long, y = lat, group = group))+
+  geom_polygon(aes(fill = poverty), color = "black")+
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45)+
+  theme_void()+
+  scale_fill_distiller(palette = "Greens", direction = 1)
+```
+
+Looking at our third model gives us one clue as to why the previous models on violent crime look the way they are. We can notice some similar visual patterns on the map on poverty; low poverty rates in New England and the midwest, and higher in the South and New Mexico. 
+
+## Conclusion
+
+Some takeaways from my models are that it seems like different types of violent crime are linked geographically. I am curious if this trend holds up if I mapped out a single state and looked at individual counties. Another takeaway is that poverty is likely one explanatoy variable of violent crime. This could be useful for prediciting violent crime, and also for trying to reduce it. For future research, I wonder what other variables would be useful in the same way. Perhaps looking at economic opportunities? Jobs? Education? These are all factors I wonder about. I also wonder if there is a regression model that could be made to predict crime, and how many variables would go into the model to make it most accurate.
+
+A few flaws in my research from this blog post: For one, the usdata is missing murder and aggravated assault data from Montana, Nebraska and Kentucky. Additionally, Hawaii and Alaska were not included on my maps. To have the most accurate analysis possible, it would be best to include these states.
