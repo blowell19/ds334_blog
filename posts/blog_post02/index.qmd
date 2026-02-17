@@ -6,7 +6,8 @@ categories: [code, analysis, crime]
 html:
   embed-resources: true
 ---
-# Blog Post 2: I want to use maps to view data on different arrest statistics across the US from the "usdata" dataset. I'll create 2 visualizations, 1 mapping murders/100k people and the other mapping assaults/100k people. I am curious as to what geo-spatial patterns may exist, if any. Next, I will pick another variable to map to try and explain one factor that could lead to high crime rates. I hope to use mapping to best show the trends in these data.
+# Blog Post 2:
+I want to use maps to view data on different arrest statistics across the US from the "usdata" dataset. I'll create 2 visualizations, 1 mapping murders/100k people and the other mapping assaults/100k people. I am curious as to what geo-spatial patterns may exist, if any. Next, I will pick another variable to map to try and explain one factor that could lead to high crime rates. I hope to use mapping to best show the trends in these data.
 
 ```{r}
 library(tidyverse)
