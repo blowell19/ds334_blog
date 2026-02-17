@@ -1,6 +1,8 @@
 ---
 title: "index"
 author: "Baxter Lowell"
+date: "02-17-2026"
+categories: [code, analysis, crime]
 html:
   embed-resources: true
 ---
