@@ -1,5 +1,5 @@
 ---
-title: "index"
+title: "Blog Post 2: Mapping Violent Crime Data & 1 Possible Predictor"
 author: "Baxter Lowell"
 date: "02-17-2026"
 categories: [code, analysis, crime]
