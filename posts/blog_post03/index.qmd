@@ -1,5 +1,5 @@
 ---
-title: "index"
+title: "Blog Post 3: Modeling OPS Using Other Hitting Statistics in MLB for 2018"
 author: "Baxter Lowell"
 ---
 
