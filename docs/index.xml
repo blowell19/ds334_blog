@@ -10,7 +10,424 @@
 <atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>My Blog From Data 334 at St. Lawrence University</description>
 <generator>quarto-1.8.25</generator>
-<lastBuildDate>Tue, 17 Feb 2026 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 10 Mar 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>index</title>
+  <dc:creator>Baxter Lowell</dc:creator>
+  <link>https://your-website-url.example.com/posts/blog_post03/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="blog-post-3-making-a-model-to-predict-2018-ops-for-players-in-the-american-league-east." class="level1">
+<h1>Blog Post 3: Making a model to predict 2018 OPS for players in the American League East.</h1>
+<p>In this blog, I will be creating a linear model to predict OPS for players in the MLB in the 2018 season. I chose the statistic OPS because it is a good way to measure overall hitting ability, as it combines on base % (OBP) with slugging (SLG), which measures a player’s ability to hit extra base hits (doubles, triples, home runs). OPS is calculated by adding a player’s OBP and SLG, which is why it can be seen as an offensively all encompassing statistic.</p>
+<p>I will be using several variables in my model, such as position, home runs, rbi, and batting average to make my models. I will make 2 models, one with an interaction term and one without.</p>
+<p>Loading in the data as well as filtering out pitchers and players who played less than 100 games. The MLB season is 162 games long, so I want to do my best to filter out players who do not play most games, as their stats may be skewed. I also made a categorical variable for rbis, counting players who had less than 60 rbis as “low rbi” hitters, and players with more than 60 in the “high rbi” group.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.6
+✔ forcats   1.0.1     ✔ stringr   1.6.0
+✔ ggplot2   4.0.1     ✔ tibble    3.3.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.2
+✔ purrr     1.2.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(openintro)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: airports
+Loading required package: cherryblossom
+Loading required package: usdata</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(broom)</span>
+<span id="cb5-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggeffects)</span>
+<span id="cb5-3">mlb_small <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> mlb_players_18 <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(position <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"P"</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> games <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb5-5">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">rbi_cat =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">if_else</span>(RBI <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">60</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rbi_low"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rbi_high"</span>)</span>
+<span id="cb5-6">  )</span></code></pre></div></div>
+</div>
+<p>Making Model 1:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">mlb_mod <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(OPS <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> position <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> doubles <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> HR <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> triples <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> rbi_cat, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_small)</span>
+<span id="cb6-2">mlb_mod <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tidy</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13 × 5
+   term           estimate std.error statistic  p.value
+   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+ 1 (Intercept)     0.580    0.0201     28.9    3.81e-80
+ 2 position2B     -0.00935  0.0144     -0.649  5.17e- 1
+ 3 position3B      0.00489  0.0143      0.342  7.33e- 1
+ 4 positionC       0.00973  0.0165      0.590  5.56e- 1
+ 5 positionCF     -0.00106  0.0149     -0.0709 9.44e- 1
+ 6 positionDH     -0.00812  0.0277     -0.294  7.69e- 1
+ 7 positionLF      0.0130   0.0142      0.916  3.61e- 1
+ 8 positionRF      0.0140   0.0146      0.955  3.40e- 1
+ 9 positionSS     -0.0248   0.0147     -1.69   9.25e- 2
+10 doubles         0.00280  0.000508    5.51   9.01e- 8
+11 HR              0.00582  0.000564   10.3    6.80e-21
+12 triples         0.00354  0.00167     2.12   3.52e- 2
+13 rbi_catrbi_low -0.00182  0.0106     -0.171  8.64e- 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">mlb_mod <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">glance</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared  sigma statistic  p.value    df logLik   AIC   BIC
+      &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     0.641         0.623 0.0568      35.7 1.00e-46    12   374. -719. -670.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+<p>Prediction for model 1:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">mlb_pred <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggpredict</span>(mlb_mod, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">terms =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"HR"</span>,</span>
+<span id="cb10-2">                              <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"doubles"</span>,</span>
+<span id="cb10-3">                              <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"triples"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"position"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rbi_cat"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb10-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.data.frame</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">terms_to_colnames =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb10-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as_tibble</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Some of the focal terms are of type `character`. This may lead to
+  unexpected results. It is recommended to convert these variables to
+  factors before fitting the model.
+  The following variables are of type character: `position`, `rbi_cat`</code></pre>
+</div>
+</div>
+<p>Graph for Model 1 Using HR, position and rbi group.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_pred, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> predicted))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb12-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> grid))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb12-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>position)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb12-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_small, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> OPS), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb12-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_viridis_d</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb12-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_minimal</span>()</span></code></pre></div></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/blog_post03/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Making Model 2 featuring an interaction between rbi category and batting average.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">mlb_mod_interact <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(OPS <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> position <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> HR <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> AVG <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> rbi_cat<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>AVG, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_small)</span>
+<span id="cb13-2">mlb_mod_interact <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tidy</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 5
+   term                 estimate std.error statistic  p.value
+   &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+ 1 (Intercept)         0.160      0.0217     7.39    2.46e-12
+ 2 position2B         -0.0163     0.00847   -1.93    5.50e- 2
+ 3 position3B          0.000800   0.00842    0.0950  9.24e- 1
+ 4 positionC           0.00312    0.00976    0.320   7.49e- 1
+ 5 positionCF          0.0000653  0.00867    0.00753 9.94e- 1
+ 6 positionDH         -0.0174     0.0163    -1.07    2.87e- 1
+ 7 positionLF         -0.00249    0.00840   -0.296   7.67e- 1
+ 8 positionRF          0.0128     0.00863    1.48    1.40e- 1
+ 9 positionSS         -0.0208     0.00858   -2.42    1.61e- 2
+10 HR                  0.00634    0.000327  19.4     4.60e-51
+11 AVG                 1.89       0.0780    24.2     2.03e-66
+12 AVG:rbi_catrbi_low  0.0596     0.0239     2.49    1.33e- 2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1">mlb_mod_interact <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">glance</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared  sigma statistic   p.value    df logLik   AIC   BIC
+      &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     0.874         0.868 0.0336      152. 1.42e-101    11   506. -985. -939.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+<p>Predictions for Interaction model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1">mlb_pred_interact <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggpredict</span>(mlb_mod_interact, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">terms =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"HR"</span>,</span>
+<span id="cb17-2">                               <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"AVG"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"position"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rbi_cat"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb17-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.data.frame</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">terms_to_colnames =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb17-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as_tibble</span>()</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Some of the focal terms are of type `character`. This may lead to
+  unexpected results. It is recommended to convert these variables to
+  factors before fitting the model.
+  The following variables are of type character: `position`, `rbi_cat`</code></pre>
+</div>
+</div>
+<p>Graph for interaction model, this time with different slopes for rbi categories based on their relationships with AVG.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_pred_interact, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> predicted))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb19-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> panel))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb19-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>position)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb19-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> mlb_small, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> OPS), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb19-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_viridis_d</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb19-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_minimal</span>()</span></code></pre></div></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/blog_post03/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion:</h2>
+<p>It appears that the interaction model is a better predictor of OPS, due to its lower AIC and BIC scores. I find it interesting how my models predict some positions to positively affect OPS, and some to lower it. This shows how different player types tend to play different positions. For example, shortstop is usually played by an extremely quick and athletic player, who may not hit for a lot of power, which would lead to a lower SLG, which contributes to a lower OPS. On the other hand, right field, considered an extremely talented position in terms of pure hitting, has a positive coefficient. This makes sense, as right field in the MLB in 2018 includes some of the best well rounded hitters such as Aaron Judge, Ronald Acuna JR, Mookie Betts, Bryce Harper and more.</p>
+<p>One thing I learned is that rbi numbers might not affect OPS all that much. I was expecting to see a larger difference in slopes with the two rbi groups for my interaction term, yet they were very similar. I also did not find it surprising to see that other stats like HR and AVG also had positive affects on OPS. Regarding my visualizations, I wish the data set had more variables that did not so obviously correlate to OPS that I could have looked at, such as if the hitter is a righty or lefty, heights, weights, age, or even college conference. I think this would have allowed me to explore some less obvious trends about what contributes to OPS.</p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://your-website-url.example.com/posts/blog_post03/</guid>
+  <pubDate>Tue, 10 Mar 2026 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Blog Post 2: Mapping Violent Crime Data &amp; 1 Possible Predictor</title>
   <dc:creator>Baxter Lowell</dc:creator>
@@ -870,423 +1287,6 @@ font-style: inherit;">"Player Name"</span>)</span></code></pre></div></div>
   <category>analysis</category>
   <guid>https://your-website-url.example.com/posts/blog_post01/</guid>
   <pubDate>Thu, 05 Feb 2026 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>index</title>
-  <dc:creator>Baxter Lowell</dc:creator>
-  <link>https://your-website-url.example.com/posts/blog_post03/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="blog-post-3-making-a-model-to-predict-2018-ops-for-players-in-the-american-league-east." class="level1">
-<h1>Blog Post 3: Making a model to predict 2018 OPS for players in the American League East.</h1>
-<p>In this blog, I will be creating a linear model to predict OPS for players in the MLB in the 2018 season. I chose the statistic OPS because it is a good way to measure overall hitting ability, as it combines on base % (OBP) with slugging (SLG), which measures a player’s ability to hit extra base hits (doubles, triples, home runs). OPS is calculated by adding a player’s OBP and SLG, which is why it can be seen as an offensively all encompassing statistic.</p>
-<p>I will be using several variables in my model, such as position, home runs, rbi, and batting average to make my models. I will make 2 models, one with an interaction term and one without.</p>
-<p>Loading in the data as well as filtering out pitchers and players who played less than 100 games. The MLB season is 162 games long, so I want to do my best to filter out players who do not play most games, as their stats may be skewed. I also made a categorical variable for rbis, counting players who had less than 60 rbis as “low rbi” hitters, and players with more than 60 in the “high rbi” group.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span></code></pre></div></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.6
-✔ forcats   1.0.1     ✔ stringr   1.6.0
-✔ ggplot2   4.0.1     ✔ tibble    3.3.1
-✔ lubridate 1.9.4     ✔ tidyr     1.3.2
-✔ purrr     1.2.1     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(openintro)</span></code></pre></div></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: airports
-Loading required package: cherryblossom
-Loading required package: usdata</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(broom)</span>
-<span id="cb5-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggeffects)</span>
-<span id="cb5-3">mlb_small <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> mlb_players_18 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">filter</span>(position <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"P"</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&amp;</span> games <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span></span>
-<span id="cb5-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(</span>
-<span id="cb5-5">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">rbi_cat =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">if_else</span>(RBI <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">60</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"rbi_low"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"rbi_high"</span>)</span>
-<span id="cb5-6">  )</span></code></pre></div></div>
-</div>
-<p>Making Model 1:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">mlb_mod <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(OPS <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> position <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> doubles <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> HR <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> triples <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> rbi_cat, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_small)</span>
-<span id="cb6-2">mlb_mod <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tidy</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 13 × 5
-   term           estimate std.error statistic  p.value
-   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
- 1 (Intercept)     0.580    0.0201     28.9    3.81e-80
- 2 position2B     -0.00935  0.0144     -0.649  5.17e- 1
- 3 position3B      0.00489  0.0143      0.342  7.33e- 1
- 4 positionC       0.00973  0.0165      0.590  5.56e- 1
- 5 positionCF     -0.00106  0.0149     -0.0709 9.44e- 1
- 6 positionDH     -0.00812  0.0277     -0.294  7.69e- 1
- 7 positionLF      0.0130   0.0142      0.916  3.61e- 1
- 8 positionRF      0.0140   0.0146      0.955  3.40e- 1
- 9 positionSS     -0.0248   0.0147     -1.69   9.25e- 2
-10 doubles         0.00280  0.000508    5.51   9.01e- 8
-11 HR              0.00582  0.000564   10.3    6.80e-21
-12 triples         0.00354  0.00167     2.12   3.52e- 2
-13 rbi_catrbi_low -0.00182  0.0106     -0.171  8.64e- 1</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">mlb_mod <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glance</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 12
-  r.squared adj.r.squared  sigma statistic  p.value    df logLik   AIC   BIC
-      &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1     0.641         0.623 0.0568      35.7 1.00e-46    12   374. -719. -670.
-# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
-</div>
-</div>
-<p>Prediction for model 1:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">mlb_pred <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggpredict</span>(mlb_mod, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">terms =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"HR"</span>,</span>
-<span id="cb10-2">                              <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"doubles"</span>,</span>
-<span id="cb10-3">                              <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"triples"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"position"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"rbi_cat"</span>)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span></span>
-<span id="cb10-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.data.frame</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">terms_to_colnames =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span></span>
-<span id="cb10-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as_tibble</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Some of the focal terms are of type `character`. This may lead to
-  unexpected results. It is recommended to convert these variables to
-  factors before fitting the model.
-  The following variables are of type character: `position`, `rbi_cat`</code></pre>
-</div>
-</div>
-<p>Graph for Model 1 Using HR, position and rbi group.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_pred, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> predicted))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">color =</span> grid))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span>position)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_small, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> OPS), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_color_viridis_d</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_minimal</span>()</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/blog_post03/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Making Model 2 featuring an interaction between rbi category and batting average.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">mlb_mod_interact <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(OPS <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> position <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> HR <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> AVG <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> rbi_cat<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span>AVG, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_small)</span>
-<span id="cb13-2">mlb_mod_interact <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tidy</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 12 × 5
-   term                 estimate std.error statistic  p.value
-   &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
- 1 (Intercept)         0.160      0.0217     7.39    2.46e-12
- 2 position2B         -0.0163     0.00847   -1.93    5.50e- 2
- 3 position3B          0.000800   0.00842    0.0950  9.24e- 1
- 4 positionC           0.00312    0.00976    0.320   7.49e- 1
- 5 positionCF          0.0000653  0.00867    0.00753 9.94e- 1
- 6 positionDH         -0.0174     0.0163    -1.07    2.87e- 1
- 7 positionLF         -0.00249    0.00840   -0.296   7.67e- 1
- 8 positionRF          0.0128     0.00863    1.48    1.40e- 1
- 9 positionSS         -0.0208     0.00858   -2.42    1.61e- 2
-10 HR                  0.00634    0.000327  19.4     4.60e-51
-11 AVG                 1.89       0.0780    24.2     2.03e-66
-12 AVG:rbi_catrbi_low  0.0596     0.0239     2.49    1.33e- 2</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1">mlb_mod_interact <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glance</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 12
-  r.squared adj.r.squared  sigma statistic   p.value    df logLik   AIC   BIC
-      &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1     0.874         0.868 0.0336      152. 1.42e-101    11   506. -985. -939.
-# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
-</div>
-</div>
-<p>Predictions for Interaction model:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1">mlb_pred_interact <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggpredict</span>(mlb_mod_interact, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">terms =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"HR"</span>,</span>
-<span id="cb17-2">                               <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"AVG"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"position"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"rbi_cat"</span>)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span></span>
-<span id="cb17-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.data.frame</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">terms_to_colnames =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%&gt;%</span></span>
-<span id="cb17-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as_tibble</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Some of the focal terms are of type `character`. This may lead to
-  unexpected results. It is recommended to convert these variables to
-  factors before fitting the model.
-  The following variables are of type character: `position`, `rbi_cat`</code></pre>
-</div>
-</div>
-<p>Graph for interaction model, this time with different slopes for rbi categories based on their relationships with AVG.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_pred_interact, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> predicted))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb19-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">color =</span> panel))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb19-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span>position)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb19-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> mlb_small, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> HR, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> OPS), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb19-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_color_viridis_d</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb19-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_minimal</span>()</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/blog_post03/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion:</h2>
-<p>It appears that the interaction model is a better predictor of OPS, due to its lower AIC and BIC scores. I find it interesting how my models predict some positions to positively affect OPS, and some to lower it. This shows how different player types tend to play different positions. For example, shortstop is usually played by an extremely quick and athletic player, who may not hit for a lot of power, which would lead to a lower SLG, which contributes to a lower OPS. On the other hand, right field, considered an extremely talented position in terms of pure hitting, has a positive coefficient. This makes sense, as right field in the MLB in 2018 includes some of the best well rounded hitters such as Aaron Judge, Ronald Acuna JR, Mookie Betts, Bryce Harper and more.</p>
-<p>One thing I learned is that rbi numbers might not affect OPS all that much. I was expecting to see a larger difference in slopes with the two rbi groups for my interaction term, yet they were very similar. I also did not find it surprising to see that other stats like HR and AVG also had positive affects on OPS. Regarding my visualizations, I wish the data set had more variables that did not so obviously correlate to OPS that I could have looked at, such as if the hitter is a righty or lefty, heights, weights, age, or even college conference. I think this would have allowed me to explore some less obvious trends about what contributes to OPS.</p>
-
-
-</section>
-</section>
-
- ]]></description>
-  <guid>https://your-website-url.example.com/posts/blog_post03/</guid>
-  <pubDate>Tue, 10 Mar 2026 23:53:54 GMT</pubDate>
 </item>
 </channel>
 </rss>
