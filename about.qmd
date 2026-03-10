@@ -12,4 +12,4 @@ about:
       href: https://github.com/blowell19
 ---
 
-About this blog
+This is my blog for Data Viz class in the spring of 2026 at St. Lawrence University. I will be using what we cover in class to look at a variety of topics that interest me, such as sports, politics, country data, and anything else that might catch my eye. Enjoy!
