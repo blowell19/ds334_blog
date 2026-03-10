@@ -1,0 +1,77 @@
+---
+title: "index"
+author: "Baxter Lowell"
+---
+
+# Blog Post 3: Making a model to predict 2018 OPS for players in the American League East.
+
+In this blog, I will be creating a linear model to predict OPS for players in the MLB in the 2018 season. I chose the statistic OPS because it is a good way to measure overall hitting ability, as it combines on base % (OBP) with slugging (SLG), which measures a player's ability to hit extra base hits (doubles, triples, home runs). OPS is calculated by adding a player's OBP and SLG, which is why it can be seen as an offensively all encompassing statistic.
+
+I will be using several variables in my model, such as position, home runs, rbi, and batting average to make my models. I will make 2 models, one with an interaction term and one without.
+
+Loading in the data as well as filtering out pitchers and players who played less than 100 games. The MLB season is 162 games long, so I want to do my best to filter out players who do not play most games, as their stats may be skewed. I also made a categorical variable for rbis, counting players who had less than 60 rbis as "low rbi" hitters, and players with more than 60 in the "high rbi" group.
+```{r}
+library(tidyverse)
+library(openintro)
+library(broom)
+library(ggeffects)
+mlb_small = mlb_players_18 %>% filter(position != "P" & games > 100) %>%
+  mutate(
+    rbi_cat = if_else(RBI < 60, "rbi_low", "rbi_high")
+  )
+  
+```
+
+Making Model 1:
+```{r}
+mlb_mod = lm(OPS ~ position + doubles + HR + triples + rbi_cat, data = mlb_small)
+mlb_mod %>% tidy()
+mlb_mod %>% glance()
+```
+Prediction for model 1:
+```{r}
+mlb_pred = ggpredict(mlb_mod, terms = c("HR",
+                              "doubles",
+                              "triples", "position", "rbi_cat")) %>%
+  as.data.frame(terms_to_colnames = TRUE) %>%
+  as_tibble()
+```
+Graph for Model 1 Using HR, position and rbi group.
+```{r}
+ggplot(data = mlb_pred, aes(x = HR, y = predicted))+
+  geom_line(aes(color = grid))+
+  facet_wrap(~position)+
+  geom_point(data = mlb_small, aes(x = HR, y = OPS), alpha = 0.2)+
+  scale_color_viridis_d()+
+  theme_minimal()
+```
+
+Making Model 2 featuring an interaction between rbi category and batting average.
+```{r}
+mlb_mod_interact = lm(OPS ~ position + HR + AVG + rbi_cat:AVG, data = mlb_small)
+mlb_mod_interact %>% tidy()
+mlb_mod_interact %>% glance()
+```
+Predictions for Interaction model:
+```{r}
+mlb_pred_interact = ggpredict(mlb_mod_interact, terms = c("HR",
+                               "AVG", "position", "rbi_cat")) %>%
+  as.data.frame(terms_to_colnames = TRUE) %>%
+  as_tibble()
+```
+Graph for interaction model, this time with different slopes for rbi categories based on their relationships with AVG.
+```{r}
+ggplot(data = mlb_pred_interact, aes(x = HR, y = predicted))+
+  geom_line(aes(color = panel))+
+  facet_wrap(~position)+
+  geom_point(data = mlb_small, aes(x = HR, y = OPS), alpha = 0.2)+
+  scale_color_viridis_d()+
+  theme_minimal()
+```
+
+## Conclusion:
+It appears that the interaction model is a better predictor of OPS, due to its lower AIC and BIC scores. I find it interesting how my models predict some positions to positively affect OPS, and some to lower it. This shows how different player types tend to play different positions. For example, shortstop is usually played by an extremely quick and athletic player, who may not hit for a lot of power, which would lead to a lower SLG, which contributes to a lower OPS. On the other hand, right field, considered an extremely talented position in terms of pure hitting, has a positive coefficient. This makes sense, as right field in the MLB in 2018 includes some of the best well rounded hitters such as Aaron Judge, Ronald Acuna JR, Mookie Betts, Bryce Harper and more. 
+
+One thing I learned is that rbi numbers might not affect OPS all that much. I was expecting to see a larger difference in slopes with the two rbi groups for my interaction term, yet they were very similar. I also did not find it surprising to see that other stats like HR and AVG also had positive affects on OPS. Regarding my visualizations, I wish the data set had more variables that did not so obviously correlate to OPS that I could have looked at, such as if the hitter is a righty or lefty, heights, weights, age, or even college conference. I think this would have allowed me to explore some less obvious trends about what contributes to OPS. 
+
+
