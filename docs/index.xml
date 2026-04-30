@@ -9,7 +9,7 @@
 <link>https://your-website-url.example.com/</link>
 <atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>My Blog From Data 334 at St. Lawrence University</description>
-<generator>quarto-1.8.25</generator>
+<generator>quarto-1.9.36</generator>
 <lastBuildDate>Tue, 10 Mar 2026 04:00:00 GMT</lastBuildDate>
 <item>
   <title>index</title>
@@ -1287,6 +1287,848 @@ font-style: inherit;">"Player Name"</span>)</span></code></pre></div></div>
   <category>analysis</category>
   <guid>https://your-website-url.example.com/posts/blog_post01/</guid>
   <pubDate>Thu, 05 Feb 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Final Project: Global Oil Trade Networks</title>
+  <dc:creator>Baxter Lowell</dc:creator>
+  <link>https://your-website-url.example.com/posts/final_project_post/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># read in data (both USA and global oil exports)</span></span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.6
+✔ forcats   1.0.1     ✔ stringr   1.6.0
+✔ ggplot2   4.0.1     ✔ tibble    3.3.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.2
+✔ purrr     1.2.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(readr)</span>
+<span id="cb3-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(dplyr)</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">global_exports_oil <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read.csv</span>(here<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"global_oil_exports.csv"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">row.names =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span>)</span>
+<span id="cb3-5"></span>
+<span id="cb3-6">usa_exports <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read.csv</span>(here<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"trade_data.csv"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">row.names =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span>)</span>
+<span id="cb3-7"></span>
+<span id="cb3-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># cleaning up USA oil exports data</span></span>
+<span id="cb3-9"></span>
+<span id="cb3-10">usa_exports_clean <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> usa_exports <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterISO"</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerISO"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cmdDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"altQty"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fobvalue"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-12">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rename</span>(</span>
+<span id="cb3-13">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exporter"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterISO"</span>,</span>
+<span id="cb3-14">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Importer"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerISO"</span>,</span>
+<span id="cb3-15">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Product"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cmdDesc"</span>,</span>
+<span id="cb3-16">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"quantity_bbl"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"altQty"</span>,</span>
+<span id="cb3-17">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"value_usd"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fobvalue"</span></span>
+<span id="cb3-18">  )<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb3-20">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">partnerDesc =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">recode</span>(partnerDesc, </span>
+<span id="cb3-21">                     <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Korea"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Rep. of Korea"</span></span>
+<span id="cb3-22">                     )</span>
+<span id="cb3-23">  )</span>
+<span id="cb3-24">  </span>
+<span id="cb3-25"></span>
+<span id="cb3-26">global_exports_clean <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> global_exports_oil <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-27">   <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterISO"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerISO"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cmdDesc"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"altQty"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fobvalue"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rename</span>(</span>
+<span id="cb3-29">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exporter"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterISO"</span>,</span>
+<span id="cb3-30">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Importer"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"partnerISO"</span>,</span>
+<span id="cb3-31">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Product"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cmdDesc"</span>,</span>
+<span id="cb3-32">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"quantity_bbl"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"altQty"</span>,</span>
+<span id="cb3-33">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"value_usd"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fobvalue"</span></span>
+<span id="cb3-34">  )<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-35">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb3-36">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">partnerDesc =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">recode</span>(partnerDesc, </span>
+<span id="cb3-37">                     <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Korea"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Rep. of Korea"</span></span>
+<span id="cb3-38">                     )</span>
+<span id="cb3-39">  )<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb3-40">   <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">slice</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">560</span>)</span></code></pre></div></div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>For my final project I am looking at global crude oil trade data from 2023. My data comes from the United Nations Comtrade Data set, which is a comprehensive database for global trade, including hundreds of products, imports and exports, and more. I also am using the Happy Planet Index to introduce some additional variables.</p>
+</section>
+<section id="datavariables" class="level2">
+<h2 class="anchored" data-anchor-id="datavariables">Data/Variables</h2>
+<p>These are the following variables of interest for my project:</p>
+<p>Exporter - The country that is exporting the good.</p>
+<p>Importer - The country that is importing the good.</p>
+<p>quantity_bbl - Quantity in Barrels of oil.</p>
+<p>value_usd - The value of oil traded in USD</p>
+<p>Region - Region of the world, assigned to each country.</p>
+<p>Life Expectancy, Population, Governance Rank, GDP Per capita.</p>
+</section>
+<section id="questions-of-interest" class="level2">
+<h2 class="anchored" data-anchor-id="questions-of-interest">Question(s) of Interest</h2>
+<p>Who does the US export oil to? Does exporting oil prop up an economy well enough to directly relate to a higher quality of life? What do trade networks look like for varying countries across the globe and how can this help explain who is effected most by global events such as conflicts, shortages, etc.?</p>
+</section>
+<section id="graph-1-usa-crude-oil-exports" class="level2">
+<h2 class="anchored" data-anchor-id="graph-1-usa-crude-oil-exports">Graph 1: USA Crude Oil Exports</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">usa_exports_clean <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(Importer <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"W00"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(partnerDesc <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Other Asia, nes"</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">arrange</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">desc</span>(quantity_bbl))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">slice_head</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb4-7">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">partnerDesc =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fct_reorder</span>(partnerDesc, quantity_bbl, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.desc =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-8"></span>
+<span id="cb4-9"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> ., <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> partnerDesc, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> quantity_bbl))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-10">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_col</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Top 20 US Crude Oil Export Destinations (2023)"</span>,</span>
+<span id="cb4-12">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Partners"</span>,</span>
+<span id="cb4-13">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Annual Barrels (BBL)"</span>,</span>
+<span id="cb4-14">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">caption =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"*Data from UN Comtrade Database 2023 Data"</span></span>
+<span id="cb4-15">       )<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-16">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-17">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coord_flip</span>()</span></code></pre></div></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/final_project_post/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="graph-2-oil-exports-vs-life-expectancy" class="level1">
+<h1>Graph 2: Oil Exports vs Life Expectancy</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(fuzzyjoin)</span>
+<span id="cb5-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(plotly)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'plotly'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ggplot2':
+
+    last_plot</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:graphics':
+
+    layout</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">hpi_df <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read_csv</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://raw.githubusercontent.com/highamm/ds234_quarto/main/data_online/hpi-tidy.csv"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 151 Columns: 11</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (3): Country, GovernanceRank, Region
+dbl (8): HPIRank, LifeExpectancy, Wellbeing, HappyLifeYears, Footprint, Happ...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">global_export_region <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stringdist_full_join</span>(</span>
+<span id="cb13-2">  hpi_df,</span>
+<span id="cb13-3">  global_exports_clean,</span>
+<span id="cb13-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Country"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reporterDesc"</span>),</span>
+<span id="cb13-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">max_dist =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb13-6">)</span>
+<span id="cb13-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># graph 2: Relating oil exports to life expectancy</span></span>
+<span id="cb13-8"></span>
+<span id="cb13-9">global_export_region1 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> global_export_region <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb13-10">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(Importer <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"W00"</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb13-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(quantity_bbl <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb13-12">  </span>
+<span id="cb13-13">region_plot <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> global_export_region1, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> LifeExpectancy, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> quantity_bbl, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> Region, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">label =</span> Country))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb13-14">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb13-15">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb13-16">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_viridis_d</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb13-17">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Life Expectancy Based on Crude Oil Exports"</span>,</span>
+<span id="cb13-18">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" Life Expectancy"</span>,</span>
+<span id="cb13-19">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Barrels Exported"</span>,</span>
+<span id="cb13-20">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">caption =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"*data from 2023 UN Comtrade Data &amp; Happy Planet Index"</span>)</span>
+<span id="cb13-21"></span>
+<span id="cb13-22"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplotly</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p =</span> region_plot, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tooltip =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>)</span></code></pre></div></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-e00713b6e8b2881519df" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-e00713b6e8b2881519df">{"x":{"data":[{"x":[73.5,73.5,73.5,69.400000000000006,74.200000000000003,68.700000000000003,74.099999999999994,74.099999999999994,74.099999999999994,74.099999999999994,74.099999999999994,74.099999999999994,74.099999999999994],"y":[47593325,1420845300,6365810000,2844781934.4000001,10367873490,4017782200,20,10,5,43000,40,76,681556705],"text":["Country: China","Country: China","Country: China","Country: Indonesia","Country: Malaysia","Country: Philippines","Country: Thailand","Country: Thailand","Country: Thailand","Country: Thailand","Country: Thailand","Country: Thailand","Country: Thailand"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(68,1,84,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(68,1,84,1)"}},"hoveron":"points","name":"East Asia","legendgroup":"East Asia","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[75.900000000000006,76.099999999999994,79.099999999999994,79.099999999999994,73.700000000000003,73.700000000000003,79.299999999999997,72.200000000000003,71.200000000000003,69.900000000000006,74],"y":[6623706300,3012270,47593325,1420845300,28567776.699999999,28567776.699999999,91.552000000000007,5900.5,87758700,6365810000,702376.91000000003],"text":["Country: Argentina","Country: Belize","Country: Chile","Country: Chile","Country: Colombia","Country: Colombia","Country: Costa Rica","Country: El Salvador","Country: Guatemala","Country: Guyana","Country: Peru"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(68,58,131,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(68,58,131,1)"}},"hoveron":"points","name":"Latin America","legendgroup":"Latin America","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[74.599999999999994,75.900000000000006,74.5],"y":[82006660000,25,1312046520],"text":["Country: Kuwait","Country: Syria","Country: Tunisia"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(49,104,142,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(49,104,142,1)"}},"hoveron":"points","name":"Middle East and North Africa","legendgroup":"Middle East and North Africa","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[65.200000000000003,65.400000000000006],"y":[275000,43640],"text":["Country: Myanmar","Country: Pakistan"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,144,140,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,144,140,1)"}},"hoveron":"points","name":"South Asia","legendgroup":"South Asia","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[51.100000000000001,53.200000000000003,51.600000000000001,51.600000000000001,57.399999999999999,57.399999999999999,55.399999999999999,64.200000000000003,64.200000000000003,57.100000000000001,54.200000000000003,51.399999999999999,58.600000000000001,62.5,62.5,62.5,54.700000000000003,51.899999999999999,55.399999999999999,59.299999999999997,57.100000000000001,57.100000000000001,54.100000000000001,49,49,49],"y":[386425653.80000001,568.75,3083818500,3083818500,13951740200,26,1115941190,1420845300,6365810000,2970,6,6,7.5499999999999998,6721.6899999999996,663,663,98,98,8500,63690165,13951740200,26,8500,6721.6899999999996,663,663],"text":["Country: Angola","Country: Botswana","Country: Cameroon","Country: Cameroon","Country: Congo","Country: Congo","Country: Cote d'Ivoire","Country: Ghana","Country: Ghana","Country: Kenya","Country: Malawi","Country: Mali","Country: Mauritania","Country: Namibia","Country: Namibia","Country: Namibia","Country: Niger","Country: Nigeria","Country: Rwanda","Country: Senegal","Country: Togo","Country: Togo","Country: Uganda","Country: Zambia","Country: Zambia","Country: Zambia"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(53,183,121,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(53,183,121,1)"}},"hoveron":"points","name":"Sub Saharan Africa","legendgroup":"Sub Saharan Africa","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,70.700000000000003,76.599999999999994,74.400000000000006,67,73.299999999999997,73.299999999999997,72.200000000000003,68.5,74,74,74,74.5,75.400000000000006,75.400000000000006,79.299999999999997,79.299999999999997,68.5],"y":[26047249100,39196600,266569000,975166000,1135960000,199007000,1341020000,743513000,221085000,630056000,2270340000,11117500000,48042500,449879000,621948000,2025080000,138338000,554367000,1221970000,48688000,106275000,1202210000,691039000,524839089,271429467,70665926869,3688726,3688726,32491976,4730370,33984209.600000001,1.7,33984207.899999999,25,1503530,1046.8299999999999,1503530,1046.8299999999999,16321050],"text":["Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Azerbaijan","Country: Croatia","Country: Hungary","Country: Kazakhstan","Country: Latvia","Country: Latvia","Country: Lithuania","Country: Mongolia","Country: Romania","Country: Romania","Country: Romania","Country: Serbia","Country: Slovakia","Country: Slovakia","Country: Slovenia","Country: Slovenia","Country: Ukraine"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(143,215,68,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(143,215,68,1)"}},"hoveron":"points","name":"Transition States","legendgroup":"Transition States","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[81.900000000000006,80.900000000000006,80,80,80,81.5,81.5,81.5,81.5,80.400000000000006,80.400000000000006,79.900000000000006,81.799999999999997,80.599999999999994,80,80,80,80,81.099999999999994,81.099999999999994,81.099999999999994,81.099999999999994,81.099999999999994,81.099999999999994,81.099999999999994,81.099999999999994,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,81.400000000000006,82.299999999999997,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003,80.200000000000003],"y":[14880141230.07,14880141230.07,11309230.58,6,6,152,1864,15000,119,2640400,2640400,125839000,146321911,146321911,3.2999999999999998,0.29999999999999999,2,1,293307000,1357390000,67057400,204278000,166950000,242627000,936167000,146979000,13.800000000000001,200,1286371673.4400001,400,32932700,276949300,31786000,33000800,31255916,32356900,301,260846660,26,674914100,1666261100,483933000,779410200,2305995400,3929837503,79689900,967525160,1158942000,432462900,52280600,14354305700,146275310,3194366700,710,404365800,1702984060,150,595719400],"text":["Country: Australia","Country: Austria","Country: Belgium","Country: Finland","Country: Finland","Country: France","Country: France","Country: France","Country: France","Country: Germany","Country: Germany","Country: Greece","Country: Iceland","Country: Ireland","Country: Luxembourg","Country: Luxembourg","Country: Luxembourg","Country: Luxembourg","Country: Norway","Country: Norway","Country: Norway","Country: Norway","Country: Norway","Country: Norway","Country: Norway","Country: Norway","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Spain","Country: Switzerland","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom","Country: United Kingdom"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(253,231,37,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(253,231,37,1)"}},"hoveron":"points","name":"Western World","legendgroup":"Western World","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"y":[5,17639400,35302195.899999999,625804,2819599248,5,249566455,368.89999999999998,8895,2414205,45838450,182843600,90,1090843,1482247512,14400,2414205],"text":"Country: NA","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":["transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent"],"opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":["transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent","transparent"]}},"hoveron":"points","name":"NA","legendgroup":"NA","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":54.794520547945211},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Life Expectancy Based on Crude Oil Exports","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[47.335000000000001,83.965000000000003],"tickmode":"array","ticktext":["50","60","70","80"],"tickvals":[50,60,70,80],"categoryorder":"array","categoryarray":["50","60","70","80"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":" Life Expectancy","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-4100332999.6849999,86106992999.985001],"tickmode":"array","ticktext":["0e+00","2e+10","4e+10","6e+10","8e+10"],"tickvals":[0,20000000000,40000000000,60000000000.000008,80000000000],"categoryorder":"array","categoryarray":["0e+00","2e+10","4e+10","6e+10","8e+10"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Barrels Exported","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"Region","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"1eb7d4b27ea":{"x":{},"y":{},"colour":{},"label":{},"type":"scatter"}},"cur_data":"1eb7d4b27ea","visdat":{"1eb7d4b27ea":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="graph-3-network-graph" class="level1">
+<h1>Graph 3: Network Graph</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(rvest)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'rvest'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:readr':
+
+    guess_encoding</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidygraph)</span></code></pre></div></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'tidygraph'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggraph)</span>
+<span id="cb20-2"></span>
+<span id="cb20-3"></span>
+<span id="cb20-4">network_graph_data <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> global_export_region <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rename</span>(</span>
+<span id="cb20-6">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">from =</span> reporterDesc,</span>
+<span id="cb20-7">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">to =</span> partnerDesc,</span>
+<span id="cb20-8">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">barrels =</span> quantity_bbl</span>
+<span id="cb20-9">  )</span>
+<span id="cb20-10"></span>
+<span id="cb20-11">nodes <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> network_graph_data <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-12">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(to, from, Country, Region)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-13">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">is.na</span>(from) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">is.na</span>(to)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-14">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">distinct</span>(Country, Region)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-15">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">slice</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">89</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-16">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rename</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">name =</span> Country)</span>
+<span id="cb20-17"></span>
+<span id="cb20-18">valid_nodes <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> nodes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>name</span>
+<span id="cb20-19"></span>
+<span id="cb20-20">edges <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">left_join</span>(network_graph_data, nodes, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">join_by</span>(Country <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> name)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-21">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(to <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"World"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-22">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(from, to, barrels) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-23">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">is.na</span>(from) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">is.na</span>(to))</span>
+<span id="cb20-24"></span>
+<span id="cb20-25"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># the following came from Claude, with the prompt : why am I getting an error in my edgelist saying there are NA's present, when I have checked for NA values?</span></span>
+<span id="cb20-26"></span>
+<span id="cb20-27">edges <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> edges <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb20-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(from <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%in%</span> valid_nodes <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> to <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%in%</span> valid_nodes)</span>
+<span id="cb20-29"></span>
+<span id="cb20-30"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># End of Claude code</span></span>
+<span id="cb20-31"></span>
+<span id="cb20-32">network_obj <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tbl_graph</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">nodes =</span> nodes, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">edges =</span> edges, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">directed =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>)</span>
+<span id="cb20-33"></span>
+<span id="cb20-34"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggraph)</span>
+<span id="cb20-35"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggraph</span>(network_obj <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">centrality =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">centrality_authority</span>()),</span>
+<span id="cb20-36">                            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">layout =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fr"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb20-37">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_edge_link</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">width =</span> barrels), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">show.legend =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb20-38">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_node_point</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">colour =</span> Region,</span>
+<span id="cb20-39">                      <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> centrality), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">show.legend =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb20-40">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_edge_width</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">range =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb20-41">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_node_text</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">label =</span> name), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">repel =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb20-42">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_colour_viridis_d</span>()</span></code></pre></div></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/final_project_post/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="future-work" class="level1">
+<h1>Future Work:</h1>
+<p>If time was not a constraint for me, I would have liked to look at trade networks over time, maybe while controlling for a select few countries. I’d like to see how different key players in oil trade have changed with whom they trade with over time, and try and explore why those changes may have occured.</p>
+<p>Some limitations for me during this project included my data. It was tough for me to clean my data in a way that made it easy to work with, and it was even harder to join my dataset with another while still keeping relevant variables. I wish I knew a little bit more about cleaning and joining datasets, as that would make it easier for me to continue to incorporate additional data sets to look at even more variables that could enhance my analysis.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>news</category>
+  <category>code</category>
+  <category>analysis</category>
+  <guid>https://your-website-url.example.com/posts/final_project_post/</guid>
+  <pubDate>Thu, 30 Apr 2026 15:59:13 GMT</pubDate>
 </item>
 </channel>
 </rss>
